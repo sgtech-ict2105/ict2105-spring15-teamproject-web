@@ -233,7 +233,7 @@ $app->post('/issue', 'authenticate', function() use ($app) {
                 $response["issue_id"] = $issue_id;
             } else {
                 $response["error"] = true;
-                $response["message"] = "Failed to create task. Please try again";
+                $response["message"] = "Failed to create issue. Please try again";
             }
             echoResponse(201, $response);
         });
@@ -250,13 +250,13 @@ $app->get('/issue', 'authenticate', function() {
             $response = array();
             $db = new DbHandler();
  
-            // fetching all user tasks
+            // fetching all issues
             $result = $db->getAllIssue();
  
             $response["error"] = false;
             $response["issue"] = array();
  
-            // looping through result and preparing tasks array
+            // looping through result and preparing issues array
             while ($issue = $result->fetch_assoc()) {
                 $tmp = array();
                 $tmp["id"] = $issue["id"];
@@ -348,6 +348,43 @@ $app->put('/issue/:id', 'authenticate', function($issue_id) use($app) {
             }
             echoResponse(200, $response);
         });
+
+
+/**
+ * Uploading image for a new issue
+ * method POST
+ * params - issue_id, image_file
+ * url - /image/
+ */
+$app->post('/image', 'authenticate', function() use ($app) {
+            // check for required params
+            verifyRequiredParams(array('issue_id'));
+ 
+            $response = array();
+            $issue_id = $app->request->post('issue_id');
+
+			if(isset($_FILES['image_file'])){
+				$file_path = "../web/issue-image/";
+	    
+				$file_path = $file_path . basename( $_FILES['image_file']['name']);
+	
+				if(move_uploaded_file($_FILES['image_file']['tmp_name'], $file_path)) {
+					$response["error"] = false;
+	                $response["message"] = "Image uploaded successfully.";
+	                $response["issue_id"] = $issue_id;
+				} else{
+					$response["error"] = true;
+	                $response["message"] = "Failed to upload image.";
+				}
+			}
+			else{
+				$response["error"] = true;
+	            $response["message"] = "Missing image file.";
+			}
+ 
+            echoResponse(200, $response);
+        });
+
 				
 $app->run();
 ?>

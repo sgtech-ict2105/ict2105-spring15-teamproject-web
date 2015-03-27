@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<title>inSite Admin Management - <?php echo $this->data['page_title']; ?></title>
-	<link rel="stylesheet" href="../templates/css/style.css" type="text/css" media="all" />
+	<link rel="stylesheet" href="templates/css/style.css" type="text/css" media="all" />
 </head>
 <body>
 <!-- Header -->
@@ -11,7 +11,7 @@
 	<div class="shell">
 		<!-- Logo + Top Nav -->
 		<div id="top">
-			<h1><a href="index.php"><img src="../templates/logo.png" id="logo" />inSITe</a></h1>
+			<h1><a href="index.php"><img src="templates/logo.png" id="logo" />inSITe</a></h1>
 			<div id="top-navigation">
 				Welcome <a href="#"><strong>Administrator</strong></a>
 				<span>|</span>
