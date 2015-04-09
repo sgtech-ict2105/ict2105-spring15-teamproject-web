@@ -102,7 +102,7 @@
 									<input type="text" class="field size1" disabled value="<?php echo $this->data['data']['date_time']; ?>" />
 								</p>
 								<p>
-									<label>Location (Lat, Lng)</label>
+									<label>Location</label>
 									<input type="text" class="field size1" disabled value="<?php echo $this->data['data']['full_location']; ?>" />
 								</p>
 								<p>
@@ -129,17 +129,15 @@
 									<input type="text" class="field size1" disabled value="<?php echo $this->data['data']['email']; ?>" />
 								</p>
 								<p>
-									<label>Mobile</label>
-									<input type="text" class="field size1" disabled value="<?php echo $this->data['data']['mobile']; ?>" />
+									<label>Contact</label>
+									<input type="text" class="field size1" disabled value="<?php echo $this->data['data']['contact']; ?>" />
 								</p>
 								<p>
 									<label>Status</label>
 									<select name="status" class="field size4">
-										<option value="" <?php echo isSelected($this->data['data']['status'], NULL); ?>>Pending</option>
+										<option value="Pending" <?php echo isSelected($this->data['data']['status'], NULL); ?>>Pending</option>
 										<option value="In progress" <?php echo isSelected($this->data['data']['status'], 'In progress'); ?>>In progress</option>
-										<option value="Temporary fixed" <?php echo isSelected($this->data['data']['status'], 'Temporary fixed'); ?>>Temporary fixed</option>
 										<option value="Resolved" <?php echo isSelected($this->data['data']['status'], 'Resolved'); ?>>Resolved</option>
-										<option value="Unresolvable" <?php echo isSelected($this->data['data']['status'], 'Unresolvable'); ?>>Unresolvable</option>
 									</select>
 								</p>
 								<p>

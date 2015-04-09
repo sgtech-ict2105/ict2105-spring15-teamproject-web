@@ -11,7 +11,7 @@ class DbHandler {
     private $conn;
  
     function __construct() {
-        require_once dirname(__FILE__) . './DbConnect.php';
+        require_once dirname(__FILE__) . '/DbConnect.php';
         // opening db connection
         $db = new DbConnect();
         $this->conn = $db->connect();
@@ -199,7 +199,7 @@ class DbHandler {
     public function createIssue($issue_name, $description, $location_name, 
     							$latitude, $longitude, $image_path,
     							$date_reported, $time_reported, $urgency_level,
-								$reporter_name, $email, $mobile) {
+								$reporter_name, $email, $contact, $status) {
        
         $stmt = $this->conn->prepare("INSERT INTO issue(issue_name, 
         							description,
@@ -212,11 +212,12 @@ class DbHandler {
         							urgency_level,
         							reporter_name,
         							email,
-        							mobile) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("sssddsssssss", $issue_name, $description, $location_name, 
+        							contact,
+									status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("sssddssssssss", $issue_name, $description, $location_name, 
         							$latitude, $longitude, $image_path,
         							$date_reported, $time_reported, $urgency_level,
-        							$reporter_name, $email, $mobile);
+        							$reporter_name, $email, $contact, $status);
         $result = $stmt->execute();
         $stmt->close();
  
@@ -250,10 +251,23 @@ class DbHandler {
     }
  
     /**
+     * Fetching issue based on issue status
+     * @param String $filter
+     */
+    public function getIssueByFilter($filter) {
+        $stmt = $this->conn->prepare("SELECT * from issue WHERE status = ? ORDER BY id DESC");
+        $stmt->bind_param("s", $filter);
+        $stmt->execute();
+        $issue = $stmt->get_result();
+        $stmt->close();
+        return $issue;
+    }
+	 
+    /**
      * Fetching all issues
      */
     public function getAllIssue() {
-        $stmt = $this->conn->prepare("SELECT * FROM issue");
+        $stmt = $this->conn->prepare("SELECT * FROM issue ORDER BY id DESC");
         $stmt->execute();
         $issue = $stmt->get_result();
         $stmt->close();

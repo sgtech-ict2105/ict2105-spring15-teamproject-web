@@ -42,11 +42,13 @@ $app->get('/issue/:id', function ($issue_id) use ($app) {
         if ($stmt->execute()) {
             $issue = $stmt->get_result()->fetch_assoc();
 			$issue['date_time'] = date_format(date_create($issue['date_reported']), 'l, jS F Y') . ' / ' . date_format(date_create($issue['time_reported']), 'g:ia');
-			$issue['full_location'] = $issue['location_name'] . ' (' . $issue['latitude'] . ', ' . $issue['longitude'] . ')';
+			
+			//$issue['full_location'] = $issue['location_name'] . ' (' . $issue['latitude'] . ', ' . $issue['longitude'] . ')';
+			$issue['full_location'] = $issue['location_name'];
 			
 			$issue['image_display'] = NULL;
 			if($issue['image_path'] != NULL){
-				$issue['image_display'] = '<img src="../../' . $issue['image_path'] . '" /><br /><br />';
+				$issue['image_display'] = '<img src="' . $issue['image_path'] . '" /><br /><br />';
 			}
 			
             

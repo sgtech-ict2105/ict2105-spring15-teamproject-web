@@ -208,15 +208,28 @@ $app->post('/issue', 'authenticate', function() use ($app) {
             $issue_name = $app->request->post('issue_name');
  			$description = $app->request->post('description');
  			$location_name = $app->request->post('location_name');
-			$latitude = $app->request->post('latitude');
-			$longitude = $app->request->post('longitude');
+			//$latitude = $app->request->post('latitude');
+			//$longitude = $app->request->post('longitude');
+			$latitude = 0;
+			$longitude = 0;
 			$image_path = $app->request->post('image_path');
+			
+			if(!empty($image_path)){
+				$image_path = sprintf(
+							"%s://%s%s%s",
+							isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
+							$_SERVER['SERVER_NAME'],
+							"/insite/web/image/issue/", $image_path);
+			}
+			
  			$date_reported = $app->request->post('date_reported');
  			$time_reported = $app->request->post('time_reported');
  			$urgency_level = $app->request->post('urgency_level');
  			$reporter = $app->request->post('reporter');
 			$email = $app->request->post('email');
-			$mobile = $app->request->post('mobile');
+			$contact = $app->request->post('contact');
+			
+			$status = "Pending"; //default value
 
             //global $user_id;
             $db = new DbHandler();
@@ -225,7 +238,8 @@ $app->post('/issue', 'authenticate', function() use ($app) {
             $issue_id = $db->createIssue($issue_name, $description, $location_name,
             							$latitude, $longitude, $image_path,
             							$date_reported, $time_reported, $urgency_level,
-										$reporter, $email, $mobile);
+										$reporter, $email, $contact,
+										$status);
  
             if ($issue_id != NULL) {
                 $response["error"] = false;
@@ -263,12 +277,15 @@ $app->get('/issue', 'authenticate', function() {
                 $tmp["issue_name"] = $issue["issue_name"];
                 $tmp["description"] = $issue["description"];
                 $tmp["location_name"] = $issue["location_name"];
-				$tmp["latitude"] = $issue["latitude"];
-				$tmp["longitude"] = $issue["longitude"];
+				//$tmp["latitude"] = $issue["latitude"];
+				//$tmp["longitude"] = $issue["longitude"];
 				$tmp["image_path"] = $issue["image_path"];
 				$tmp["date_reported"] = $issue["date_reported"];
 				$tmp["time_reported"] = $issue["time_reported"];
 				$tmp["urgency_level"] = $issue["urgency_level"];
+				$tmp["reporter_name"] = $issue["reporter_name"];
+				$tmp["email"] = $issue["email"];
+				$tmp["contact"] = $issue["contact"];
 				$tmp["status"] = $issue["status"];
                 $tmp["status_comment"] = $issue["status_comment"];
                 
@@ -279,13 +296,59 @@ $app->get('/issue', 'authenticate', function() {
         });
 
 /**
+ * Listing all issues
+ * method GET
+ * url /issue          
+ */
+$app->get('/issue/status/:filter', 'authenticate', function($filter) {
+
+            $response = array();
+            $db = new DbHandler();
+
+			if($filter == "progress"){
+				$filter = "in progress";
+			}
+			
+            // fetching issues based on issue status
+            $result = $db->getIssueByFilter($filter);
+ 
+            $response["error"] = false;
+            $response["issue"] = array();
+
+            // looping through result and preparing issues array
+            while ($issue = $result->fetch_assoc()) {
+                $tmp = array();
+                $tmp["id"] = $issue["id"];
+                $tmp["issue_name"] = $issue["issue_name"];
+                $tmp["description"] = $issue["description"];
+                $tmp["location_name"] = $issue["location_name"];
+				//$tmp["latitude"] = $issue["latitude"];
+				//$tmp["longitude"] = $issue["longitude"];
+				$tmp["image_path"] = $issue["image_path"];
+				$tmp["date_reported"] = $issue["date_reported"];
+				$tmp["time_reported"] = $issue["time_reported"];
+				$tmp["urgency_level"] = $issue["urgency_level"];
+				$tmp["reporter_name"] = $issue["reporter_name"];
+				$tmp["email"] = $issue["email"];
+				$tmp["contact"] = $issue["contact"];
+				$tmp["status"] = $issue["status"];
+                $tmp["status_comment"] = $issue["status_comment"];
+                
+                array_push($response["issue"], $tmp);
+            }
+
+            echoResponse(200, $response);
+        });
+
+
+/**
  * Listing single issue
  * method GET
  * url /issue/:id
  * Will return 404 if the issue doesn't exists
  */
 $app->get('/issue/:id', 'authenticate', function($issue_id) {
-            global $user_id;
+
             $response = array();
             $db = new DbHandler();
  
@@ -306,7 +369,7 @@ $app->get('/issue/:id', 'authenticate', function($issue_id) {
 				$response["urgency_level"] = $result["urgency_level"];
 				$response["reporter_name"] = $result["reporter_name"];
 				$response["email"] = $result["email"];
-				$response["mobile"] = $result["mobile"];
+				$response["contact"] = $result["contact"];
                 $response["status"] = $result["status"];
 				$response["status_comment"] = $result["status_comment"];
                 
@@ -327,8 +390,7 @@ $app->get('/issue/:id', 'authenticate', function($issue_id) {
 $app->put('/issue/:id', 'authenticate', function($issue_id) use($app) {
             // check for required params
             verifyRequiredParams(array('status'));
- 
-            global $user_id;            
+            
             $status = $app->request->put('status');
             $status_comment = $app->request->put('status_comment');
 			 
@@ -358,20 +420,20 @@ $app->put('/issue/:id', 'authenticate', function($issue_id) use($app) {
  */
 $app->post('/image', 'authenticate', function() use ($app) {
             // check for required params
-            verifyRequiredParams(array('issue_id'));
+            //verifyRequiredParams(array('issue_id'));
  
             $response = array();
-            $issue_id = $app->request->post('issue_id');
+            //$issue_id = $app->request->post('issue_id');
 
 			if(isset($_FILES['image_file'])){
-				$file_path = "../web/issue-image/";
+				$file_path = "../web/image/issue/";
 	    
 				$file_path = $file_path . basename( $_FILES['image_file']['name']);
-	
+				
 				if(move_uploaded_file($_FILES['image_file']['tmp_name'], $file_path)) {
 					$response["error"] = false;
 	                $response["message"] = "Image uploaded successfully.";
-	                $response["issue_id"] = $issue_id;
+	                //$response["issue_id"] = $issue_id;
 				} else{
 					$response["error"] = true;
 	                $response["message"] = "Failed to upload image.";
